@@ -9,7 +9,7 @@
 #include<sys/shm.h>
 #include<termios.h>
 
-pthread_t tid[10]; //0=hunger, 1=hygiene, 2=mandi
+pthread_t tid[5]; //0=hunger, 1=hygiene, 2=mandi, 3=regen, 4=game
 int hunger_stat, hygiene_stat, health_stat, monster_health, food_stock, *shop_stock; 
 int cooldown, flag, input, mandi_flag;
 char nama[50];
@@ -196,7 +196,7 @@ int main()
 	hygiene_stat=100;
 	health_stat=300;
 	monster_health=100;
-	food_stock=5;
+	food_stock=0;
 	flag=1;
 	cooldown=0;
 	mandi_flag=0;
