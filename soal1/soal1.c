@@ -7,7 +7,7 @@
 #include<sys/wait.h>
 
 pthread_t tid[1005];
-int n, t, fact[1005], ans[1005];
+int t, fact[1005], ans[1005];
 
 void* factorial(void *arg)
 {
