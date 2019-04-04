@@ -634,7 +634,7 @@ void main()
                         exit(0);
                 }
         }
-        shmdt(shop_stock);
-        shmctl(shmid, IPC_RMID, NULL);
+        //shmdt(shop_stock);
+        //shmctl(shmid, IPC_RMID, NULL);
 }
 ```
