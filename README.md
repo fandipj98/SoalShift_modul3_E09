@@ -476,11 +476,10 @@ Pada standby mode, user memiliki 5 option yaitu:
 3. Battle yaitu merubah mode menjadi battle mode.
 4. Shop yaitu merubah mode menjadi shop mode.
 5. Exit yaitu exit dari program.
-<br/>
 <br/>Pada shop mode, user memiliki 2 option yaitu:
 1. Buy yaitu menambah food stock sebanyak 1 dan mengurangi shop food stock sebanyak 1. Option ini hanya bisa dijalankan jika shop food stocknya ada (>0).
-2. Back yaitu kembali ke standby mode.<br/>
-<br/>Berikut syntax dari standby mode dan shop mode:
+2. Back yaitu kembali ke standby mode.
+<br/><br/>Berikut syntax dari standby mode dan shop mode:
 ```
 int main(){
 	while (1) {		
@@ -570,7 +569,7 @@ int main(){
 Untuk program penjual, digunakan shared memory untuk shop food stocknya sehingga nilai dari shop food stock pada penjual dapat bernilai sama dengan pembeli. Selain itu juga dibuat 1 thread untuk user interfacenya. Kemudian untuk inputannya dapat dibaca dengan key press saja seperti program pembeli. Terdapat 2 mode pada program penjual yaitu:
 1. Restock yaitu untuk menambah shop food stock sebesar 1.
 2. Exit yaitu untuk exit dari program penjual.
-<br/>Berikut syntax dari program penjual:
+<br/><br/>Berikut syntax dari program penjual:
 ```
 #include<stdio.h>
 #include<string.h>
