@@ -187,7 +187,7 @@ int main()
 	key_t key = 1234;
 
 	int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
-    shop_stock = shmat(shmid, NULL, 0);
+    	shop_stock = shmat(shmid, NULL, 0);
 
 	printf("Input Your Monster's Name: ");
 	scanf("%s", nama);
