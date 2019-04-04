@@ -255,3 +255,387 @@ int main(){
 Jika inputan user adalah "Agmal Ayo Bangun", maka akan menambah WakeUp_Status Agmal sebesar 15, jika inputan user adalah "Iraj Ayo Tidur", maka akan mengurangi Spirit_Status Iraj sebanyak 20, jika inputan user adalah "All Status", maka akan menampilkan WakeUp_Status dari Agmal dan Spirit_Status dari Iraj.
 Jika fitur Agmal Ayo Bangun dijalankan, maka counter1 akan ditambah 1, Jika fitur Iraj Ayo Tidur dijalankan, maka counter2 akan ditambah 1. Jika counter1>=3 maka counter1 akan dikurangi 3 dan fitur Iraj Ayo Tidur akan didisable selama 10 detik. Jika counter2>=3 maka counter2 akan dikurangi 3 dan fitur Agmal Ayo Bangun akan didisable selama 10 detik.
 Program akan berakhir jika WakeUp_Status Agmal >=100 dan Spirit_Status Iraj <=0.
+## Nomor 5
+### Soal:
+5. Angga, adik Jiwang akan berulang tahun yang ke sembilan pada tanggal 6 April besok. Karena lupa menabung, Jiwang tidak mempunyai uang sepeserpun untuk membelikan Angga kado. Kamu sebagai sahabat Jiwang ingin membantu Jiwang membahagiakan adiknya sehingga kamu menawarkan bantuan membuatkan permainan komputer sederhana menggunakan program C. Jiwang sangat menyukai idemu tersebut. Berikut permainan yang Jiwang minta.
+<br/>a. Pemain memelihara seekor monster lucu dalam permainan. Pemain dapat  memberi nama pada monsternya.
+<br/>b. Monster pemain memiliki hunger status yang berawal dengan nilai 200 (maksimalnya) dan nanti akan berkurang 5 tiap 10 detik.Ketika hunger status mencapai angka nol, pemain akan kalah. Hunger status dapat bertambah 15 apabila pemain memberi makan kepada monster, tetapi banyak makanan terbatas dan harus beli di Market.
+<br/>c. Monster pemain memiliki hygiene status yang berawal dari 100 dan nanti berkurang 10 tiap 30 detik. Ketika hygiene status mencapai angka nol, pemain akan kalah. Hygiene status' dapat bertambah 30 hanya dengan memandikan monster. Pemain dapat memandikannya setiap 20 detik(cooldownnya 20 detik).
+<br/>d. Monster pemain memiliki health status yang berawal dengan nilai 300. Variabel ini bertambah (regenerasi)daa 5 setiap 10 detik ketika monster dalam keadaan standby.
+<br/>e. Monster pemain dapat memasuki keadaan battle. Dalam keadaan ini, food status(fitur b), hygiene status'(fitur c), dan ‘regenerasi’(fitur d) tidak akan berjalan. Health status dari monster dimulai dari darah saat monster pemain memasuki battle. Monster pemain akan bertarung dengan monster NPC yang memiliki darah 100. Baik monster pemain maupun NPC memiliki serangan sebesar 20. Monster pemain dengan monster musuh akan menyerang secara bergantian. 
+<br/>f. Fitur shop, pemain dapat membeli makanan sepuas-puasnya selama stok di toko masih tersedia.
+     * Pembeli (terintegrasi dengan game)
+       * Dapat mengecek stok makanan yang ada di toko.
+       * Jika stok ada, pembeli dapat membeli makanan.
+     * Penjual (terpisah)
+       * Bisa mengecek stok makanan yang ada di toko
+       * Penjual dapat menambah stok makanan.
+
+Spesifikasi program:
+<br/>A. Program mampu mendeteksi input berupa key press. (Program bisa berjalan tanpa perlu menekan tombol enter)
+<br/>B. Program terdiri dari 3 scene yaitu standby, battle, dan shop.
+<br/>C. Pada saat berada di standby scene, program selalu menampilkan health status, hunger status, hygiene status, stok makanan tersisa, dan juga status kamar mandi (“Bath is ready” jika bisa digunakan, “Bath will be ready in [bath cooldown]s” jika sedang cooldown). Selain itu program selalu menampilkan 5 menu, yaitu memberi makan, mandi, battle, shop, dan exit.
+<br/>Contoh :<br/>
+<br/>Standby Mode
+<br/>Health : [health status]
+<br/>Hunger : [hunger status]
+<br/>Hygiene : [hygiene status]
+<br/>Food left : [your food stock]
+<br/>Bath will be ready in [cooldown]s
+<br/>Choices
+<br/>1. Eat
+<br/>2. Bath
+<br/>3. Battle
+<br/>4. Shop
+<br/>5. Exit<br/>
+<br/>D. Pada saat berada di battle scene, program selalu menampilkan health status milik pemain dan monster NPC. Selain itu, program selalu menampilkan 2 menu yaitu serang atau lari.
+<br/>Contoh :<br/>
+<br/>Battle Mode
+<br/>Monster’s Health : [health status]
+<br/>Enemy’s Health : [enemy health status]
+<br/>Choices
+<br/>1. Attack
+<br/>2. Run<br/>
+<br/>E. Pada saat berada di shop scene versi pembeli, program selalu menampilkan food stock toko dan milik pemain. Selain itu, program selalu menampilkan 2 menu yaitu beli dan kembali ke standby scene.<br/>Contoh :<br/>
+<br/>Shop Mode
+<br/>Shop food stock : [shop food stock]
+<br/>Your food stock : [your food stock]
+<br/>Choices
+<br/>1. Buy
+<br/>2. Back<br/>
+<br/>F. Pada program penjual, program selalu menampilkan food stock toko. Selain itu, program juga menampilkan 2 menu yaitu restock dan exit.<br/>Contoh :<br/>
+<br/>Shop
+<br/>Food stock : [shop food stock]
+<br/>Choices
+<br/>1. Restock
+<br/>2. Exit<br/>
+<br/>G. Pastikan terminal hanya mendisplay status detik ini sesuai scene terkait (hint: menggunakan system(“clear”))
+### Jawaban:
+Untuk program pembeli dan game, pertama - tama kita perlu membaca inputan untuk nama monster, kemudian membuat 5 thread dan fungsinya yaitu:
+1. Thread untuk mengurangi secara otomatis hunger status sebesar 5 setiap 10 detik ketika standby mode, jika hunger status <= 0 maka exit program.
+2. Thread untuk mengurangi secara otomatis hygiene status sebesar 10 setiap 30 detik ketika standby mode, jika hygiene status <= 0 maka exit program.
+3. Thread untuk menambah hygiene status sebesar 15 ketika memilih option bath pada standby mode. Thread ini memiliki waktu cooldown 20 detik.
+4. Thread untuk menambah secara otomatis health status sebesar 5 setiap 10 detik ketika standby mode.
+5. Thread untuk user interface dari 3 mode (standby, battle, shop) dan battle mode. Pada battle mode, monster pemain akan bertarung dengan monster NPC yang memiliki darah 100. Baik monster user maupun NPC memiliki serangan sebesar 20. Monster user dengan monster musuh akan menyerang secara bergantian dengan diawali oleh user. Pada battle mode, user dapat memilih option menyerang atau melarikan diri. Battle mode akan dilooping terus dan akan kembali ke standby mode jika user melarikan diri atau monster lawan mati. Jika pada saat battle mode, health status dari monster user <= 0 maka exit program.
+<br/>Berikut syntax dari 5 fungsi thread tersebut:
+```
+void* hunger(void *arg)
+{
+	pthread_t id = pthread_self();
+	while (1) {
+		if (pthread_equal(id, tid[0])) {
+			if(flag==1){	
+				sleep(10);
+				if(flag==1){
+					hunger_stat-=5;
+					if(hunger_stat<=0){
+						system("clear");
+						printf("Standby Mode\nMonster's Name: %s\nHealth : %d\nHunger : %d\nHygiene : %d\nFood Left : %d\nBath is ready\nChoices\n1. Eat\n2. Bath\n3. Battle\n4. Shop\n5. Exit\n", nama, health_stat, hunger_stat, hygiene_stat, food_stock);
+						puts("You died because of starvation");
+						exit(0);
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+void* hygiene(void *arg)
+{
+	pthread_t id = pthread_self();
+	while (1) {
+		if (pthread_equal(id, tid[1])) {
+			if(flag==1){
+				sleep(30);
+				if(flag==1){
+					hygiene_stat-=10;
+					if(hygiene_stat<=0){
+						system("clear");
+						printf("Standby Mode\nMonster's Name: %s\nHealth : %d\nHunger : %d\nHygiene : %d\nFood Left : %d\nBath is ready\nChoices\n1. Eat\n2. Bath\n3. Battle\n4. Shop\n5. Exit\n", nama, health_stat, hunger_stat, hygiene_stat, food_stock);
+						puts("You died because of dirty");
+						exit(0);
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+void* mandi(void *arg)
+{
+	pthread_t id = pthread_self();
+	while (1) {
+		if (pthread_equal(id, tid[2])) {
+			if(mandi_flag==1){
+				if(hygiene_stat<=100 && cooldown==0){	
+					cooldown=20;
+					hygiene_stat+=15;
+					if(hygiene_stat>=100){
+						hygiene_stat=100;
+					}
+				}
+				mandi_flag=0;
+			}
+			while(cooldown>0){
+				sleep(1);
+				cooldown--;	
+			}
+		}
+	}
+	return NULL;
+}
+
+void* regen(void *arg)
+{
+	pthread_t id = pthread_self();
+	while (1) {
+		if (pthread_equal(id, tid[3])) {
+			if(flag==1){	
+				sleep(10);
+				if(health_stat<300 && flag==1){	
+					health_stat+=5;
+					if(health_stat>=300){
+						health_stat=300;
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
+void* game(void *arg)
+{
+	pthread_t id = pthread_self();
+	while (1) {
+		if (pthread_equal(id, tid[4])) {
+			if(flag==1){
+				if(cooldown==0){
+					system("clear");
+					printf("Standby Mode\nMonster's Name: %s\nHealth : %d\nHunger : %d\nHygiene : %d\nFood Left : %d\nBath is ready\nChoices\n1. Eat\n2. Bath\n3. Battle\n4. Shop\n5. Exit\n", nama, health_stat, hunger_stat, hygiene_stat, food_stock);
+					sleep(1);
+				}
+				else{
+					system("clear");
+					printf("Standby Mode\nMonster's Name: %s\nHealth : %d\nHunger : %d\nHygiene : %d\nFood Left : %d\nBath will be ready in %ds\nChoices\n1. Eat\n2. Bath\n3. Battle\n4. Shop\n5. Exit\n", nama, health_stat, hunger_stat, hygiene_stat, food_stock, cooldown);
+					sleep(1);
+				}
+			}
+			else if(flag==2){
+				monster_health=100;
+				while(1){
+					sleep(1);
+					system("clear");
+					printf("Battle Mode\nMonster's Name: %s\nMonster's Health : %d\nEnemy's Health : %d\nChoices\n1. Attack\n2. Run\n", nama, health_stat, monster_health);
+					input = mygetch() - '0';
+					if(input==1){
+						monster_health-=20;
+						sleep(1);
+						system("clear");
+						printf("Battle Mode: your's turn\nMonster's Name: %s\nMonster's Health : %d\nEnemy's Health : %d\nChoices\n1. Attack\n2. Run\n", nama, health_stat, monster_health);
+						if(monster_health<=0){
+							puts("You win!");
+							flag=1;
+							break;
+						}
+						sleep(1);
+						health_stat-=20;
+						if(health_stat<=0){
+							health_stat=0;
+							system("clear");
+							printf("Battle Mode\nMonster's Name: %s\nMonster's Health : %d\nEnemy's Health : %d\n", nama, health_stat, monster_health);
+							
+							puts("You died because killed");
+							exit(0);
+						}
+						system("clear");
+						printf("Battle Mode: enemy's turn\nMonster's Name: %s\nMonster's Health : %d\nEnemy's Health : %d\n", nama, health_stat, monster_health);
+					}
+					else if(input==2){
+						puts("You ran away!");
+						flag=1;
+						break;
+					}
+				}
+			}
+			else if(flag==3){
+				system("clear");	
+				printf("Shop Mode\nShop food stock : %d\nYour food stock : %d\nChoices\n1. Buy\n2. Back\n", shop_stock[0], food_stock);
+				sleep(2);
+			}
+		}
+	}
+	return NULL;
+}
+```
+Pada standby mode, user memiliki 5 option yaitu:
+1. Eat yaitu menambah hunger status sebesar 15 dan mengurangi food stock sebesar 1 setiap kali makan. Hanya bisa dilakukan jika food stocknya ada (>0).
+2. Bath yaitu menjalankan thread 3 yang menambah hygiene status sebesar 15.
+3. Battle yaitu merubah mode menjadi battle mode.
+4. Shop yaitu merubah mode menjadi shop mode.
+5. Exit yaitu exit dari program.
+<br/>
+<br/>Pada shop mode, user memiliki 2 option yaitu:
+1. Buy yaitu menambah food stock sebanyak 1 dan mengurangi shop food stock sebanyak 1. Option ini hanya bisa dijalankan jika shop food stocknya ada (>0).
+2. Back yaitu kembali ke standby mode.<br/>
+<br/>Berikut syntax dari standby mode dan shop mode:
+```
+int main(){
+	while (1) {		
+			if(flag==1){
+				input = mygetch() - '0';
+				if(input==1){
+					if(food_stock>0){
+						if(hunger_stat<=200){	
+							hunger_stat+=15;
+							food_stock--;
+							if(hunger_stat>=200){
+								hunger_stat=200;
+							}
+						}
+					}
+					else{
+						puts("Your Food Stock is Empty");
+						sleep(1);
+					}
+				}
+				else if(input==2 && cooldown==0){
+					mandi_flag=1;
+				}
+				else if(input==3){
+					flag=2;
+				}
+				else if(input==4){
+					flag=3;
+				}
+				else if(input==5){
+					puts("You Exit The Game");
+					exit(0);
+				}
+			}
+			else if(flag==3){
+				input = mygetch() - '0';
+				if(input==1){
+					if(shop_stock[0]>0){
+						food_stock++;
+						shop_stock[0]--;	
+					}
+					else{
+						puts("The Shop is Out of Stock");
+					}
+				}
+				else if(input==2){
+					flag=1;
+				}
+			}
+	}
+}
+```
+Kemudian program dapat mendeteksi inputan berupa key press (program bisa berjalan tanpa perlu menekan tombol enter). Syntaxnya adalah seperti berikut ini:
+```
+#include<termios.h>
+int mygetch ( void ) 
+{
+  int ch;
+  struct termios oldt, newt;
+  
+  tcgetattr ( STDIN_FILENO, &oldt );
+  newt = oldt;
+  newt.c_lflag &= ~( ICANON | ECHO );
+  tcsetattr ( STDIN_FILENO, TCSANOW, &newt );
+  ch = getchar();
+  tcsetattr ( STDIN_FILENO, TCSANOW, &oldt );
+  
+  return ch;
+}
+
+int input;
+
+int main(){
+	input = mygetch() - '0';
+}
+```
+Digunakan shared memory untuk shop food stocknya sehingga nilai dari shop food stock pada pembeli dapat bernilai sama dengan penjual. Berikut syntaxnya:
+```
+#include<sys/shm.h>
+
+int main(){
+	key_t key = 1234;
+	int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+	shop_stock = shmat(shmid, NULL, 0);
+}
+```
+Untuk program penjual, digunakan shared memory untuk shop food stocknya sehingga nilai dari shop food stock pada penjual dapat bernilai sama dengan pembeli. Selain itu juga dibuat 1 thread untuk user interfacenya. Kemudian untuk inputannya dapat dibaca dengan key press saja seperti program pembeli. Terdapat 2 mode pada program penjual yaitu:
+1. Restock yaitu untuk menambah shop food stock sebesar 1.
+2. Exit yaitu untuk exit dari program penjual.
+<br/>Berikut syntax dari program penjual:
+```
+#include<stdio.h>
+#include<string.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+#include<unistd.h>
+#include<pthread.h>
+#include<sys/wait.h>
+#include<stdlib.h>
+#include<termios.h>
+
+pthread_t tid[1];
+int *shop_stock;
+
+int mygetch ( void ) 
+{
+  int ch;
+  struct termios oldt, newt;
+  
+  tcgetattr ( STDIN_FILENO, &oldt );
+  newt = oldt;
+  newt.c_lflag &= ~( ICANON | ECHO );
+  tcsetattr ( STDIN_FILENO, TCSANOW, &newt );
+  ch = getchar();
+  tcsetattr ( STDIN_FILENO, TCSANOW, &oldt );
+  
+  return ch;
+}
+
+void* shop(void *arg)
+{
+        pthread_t id = pthread_self();
+        while (1) {
+                if (pthread_equal(id, tid[0])) {
+                        system("clear");
+                        printf("Shop\nFood stock : %d\nChoices\n1. Restock\n2. Exit\n", shop_stock[0]);
+                        sleep(1);
+                }
+        }
+        return NULL;
+}
+
+
+void main()
+{
+        key_t key = 1234;
+        int input;
+
+        int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+        shop_stock = shmat(shmid, NULL, 0);
+
+        pthread_create(&(tid[0]), NULL, &shop, NULL);
+        
+        while (1) {
+                input = mygetch() -'0';
+                
+                if(input==1){
+                        shop_stock[0] = shop_stock[0] + 1;
+                }
+                else if(input==2){
+                        puts("You Exit The Shop");
+                        exit(0);
+                }
+        }
+        shmdt(shop_stock);
+        shmctl(shmid, IPC_RMID, NULL);
+}
+```
