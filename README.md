@@ -133,6 +133,224 @@ int main(){
 ```
 Kemudian tinggal print semua nilai yang ada di array yang sudah tersort secara urut.
 
+##Nomor 2
+### Soal:
+2. Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, dia memintamu membuat program C dengan spesifikasi sebagai berikut:
+	* Terdapat 2 server: server penjual dan server pembeli 
+	* 1 server hanya bisa terkoneksi dengan 1 client
+	* Server penjual dan server pembeli memiliki stok barang yang selalu sama
+	* Client yang terkoneksi ke server penjual hanya bisa menambah stok
+		* Cara menambah stok: client yang terkoneksi ke server penjual mengirim string “tambah” ke server lalu stok bertambah 1
+	* Client yang terkoneksi ke server pembeli hanya bisa mengurangi stok
+		* Cara mengurangi stok: client yang terkoneksi ke server pembeli mengirim string “beli” ke server lalu stok berkurang 1
+	* Server pembeli akan mengirimkan info ke client yang terhubung dengannya apakah transaksi berhasil atau tidak berdasarkan ketersediaan stok
+		* Jika stok habis maka client yang terkoneksi ke server pembeli akan mencetak “transaksi gagal”
+		* Jika stok masih ada maka client yang terkoneksi ke server pembeli akan mencetak “transaksi berhasil”
+	* Server penjual akan mencetak stok saat ini setiap 5 detik sekali
+	* __Menggunakan thread, socket, shared memory__
+
+## Jawaban:
+Langkah pertama adalah membuat dua buah server untuk penjual dan pembeli yang memiliki suatu shared memory untuk memeriksa stock barang. Sintaks untuk keduanya adalah:
+```
+int *stock;
+...
+key_t key = 1234;
+
+int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+stock = shmat(shmid, NULL, 0);
+*stock = 0;
+...
+
+shmdt(stock);
+shmctl(shmid, IPC_RMID, NULL);
+```
+Lalu, agar masing - masing server dapat terhubung dengan clientnya masing - masing maka dibuatkan socket untuk tiap server dengan port yang berbeda dalam hal ini, pembeli di assign dengan port 8080. Sintaks server pembeli menjadi:
+```
+#define PORT 8080
+
+int server_fd, new_socket, valread;
+struct sockaddr_in address;
+int opt = 1;
+int addrlen = sizeof(address);
+char buffer[10] = {0};
+char *fail = "transaksi gagal";
+char *success = "transaksi berhasil";
+  
+if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    perror("socket failed");
+    exit(EXIT_FAILURE);
+}
+  
+if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+    perror("setsockopt");
+    exit(EXIT_FAILURE);
+}
+
+address.sin_family = AF_INET;
+address.sin_addr.s_addr = INADDR_ANY;
+address.sin_port = htons( PORT );
+  
+if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+    perror("bind failed");
+    exit(EXIT_FAILURE);
+}
+
+if (listen(server_fd, 3) < 0) {
+    perror("listen");
+    exit(EXIT_FAILURE);
+}
+
+if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+    perror("accept");
+    exit(EXIT_FAILURE);
+}
+```
+Sedangkan penjual akan diberikan port 8000. Sntaksnya menjadi:
+```
+int server_fd, new_socket, valread;
+struct sockaddr_in address;
+int opt = 1;
+int addrlen = sizeof(address);
+char buffer[1024] = {0};
+...
+if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+    perror("socket failed");
+    exit(EXIT_FAILURE);
+}
+  
+if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+    perror("setsockopt");
+    exit(EXIT_FAILURE);
+}
+
+address.sin_family = AF_INET;
+address.sin_addr.s_addr = INADDR_ANY;
+address.sin_port = htons( PORT );
+  
+if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+    perror("bind failed");
+    exit(EXIT_FAILURE);
+}
+
+if (listen(server_fd, 3) < 0) {
+    perror("listen");
+    exit(EXIT_FAILURE);
+}
+
+if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+    perror("accept");
+    exit(EXIT_FAILURE);
+}
+```
+Dapat diperhatikan bahwa untuk server pembeli hanya perlu mengirimkan hasil transaksi gagal atau berhasil sekaligus mengurangi stok sehingga pada main programnya hanya memerlukan:
+```
+while (1) {
+    valread = read( new_socket , buffer, 10);
+    if (*stock <= 0) {
+        send(new_socket , fail , strlen(fail) , 0 );
+    } else {
+        send(new_socket , success , strlen(success) , 0 );
+        (*stock)--;
+    }
+}
+```
+Sedangkan untuk server penjual perlu menambah stok dan display stock setiap 5 detik secara paralel. Sehingga diperlukan multi threading
+```
+void* routine(void *arg)
+{
+    pthread_t id = pthread_self();
+    if (pthread_equal(id, tid[0])) {
+        while (1) {
+            printf("Stock: %d\n", *stock);
+            sleep(5);
+        }
+    } else {
+        while (1) {
+            valread = read( new_socket , buffer, 1024); 
+            (*stock)++;
+        }
+    }
+
+    return NULL;
+}
+...
+pthread_create(&(tid[0]),NULL,&routine,NULL);
+pthread_create(&(tid[1]),NULL,&routine,NULL);
+pthread_join(tid[0],NULL);
+pthread_join(tid[1],NULL);
+```
+Jika sudah, maka pembuatan server telah selesai. Untuk membuat client cukup membuat socket dengan port yang bersesuaian dengan servernya dan inputan masing - masing. Untuk client pembeli sintaksnya:
+```
+#define PORT 8080
+...
+struct sockaddr_in address;
+int sock = 0, valread;
+struct sockaddr_in serv_addr;
+char input[10];
+char buffer[1024] = {0};
+
+if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    printf("\n Socket creation error \n");
+    return -1;
+}
+
+memset(&serv_addr, '0', sizeof(serv_addr));
+
+serv_addr.sin_family = AF_INET;
+serv_addr.sin_port = htons(PORT);
+  
+if(inet_pton(AF_INET, "192.168.43.160", &serv_addr.sin_addr)<=0) {
+    printf("\nInvalid address/ Address not supported \n");
+    return -1;
+}
+
+if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    printf("\nConnection Failed \n");
+    return -1;
+}
+while (1) {
+    scanf("%s", input);
+    send(sock , input , strlen(input) , 0 );
+    memset(buffer, 0, sizeof buffer);
+    valread = read( sock , buffer, 1024);
+    printf("%s\n",buffer );
+}
+```
+Sedangkan untuk penjual sintaksnya:
+```
+#define PORT 8000
+struct sockaddr_in address;
+int sock = 0, valread;
+struct sockaddr_in serv_addr;
+char input[10];
+char buffer[1024] = {0};
+
+if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    printf("\n Socket creation error \n");
+    return -1;
+}
+
+memset(&serv_addr, '0', sizeof(serv_addr));
+
+serv_addr.sin_family = AF_INET;
+serv_addr.sin_port = htons(PORT);
+  
+if(inet_pton(AF_INET, "192.168.43.160", &serv_addr.sin_addr)<=0) {
+    printf("\nInvalid address/ Address not supported \n");
+    return -1;
+}
+
+if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    printf("\nConnection Failed \n");
+    return -1;
+}
+while (1) {
+    scanf("%s", input);
+    send(sock , input , strlen(input) , 0 );
+}
+```
+
+
 ## Nomor 3
 ### Soal:
 3. Agmal dan Iraj merupakan 2 sahabat yang sedang kuliah dan hidup satu kostan, sayangnya mereka mempunyai gaya hidup yang berkebalikan, dimana Iraj merupakan laki-laki yang sangat sehat,rajin berolahraga dan bangun tidak pernah kesiangan sedangkan Agmal hampir menghabiskan setengah umur hidupnya hanya untuk tidur dan ‘ngoding’. Dikarenakan mereka sahabat yang baik, Agmal dan iraj sama-sama ingin membuat satu sama lain mengikuti gaya hidup mereka dengan cara membuat Iraj sering tidur seperti Agmal, atau membuat Agmal selalu bangun pagi seperti Iraj. Buatlah suatu program C untuk menggambarkan kehidupan mereka dengan spesifikasi sebagai berikut:
@@ -255,6 +473,11 @@ int main(){
 Jika inputan user adalah "Agmal Ayo Bangun", maka akan menambah WakeUp_Status Agmal sebesar 15, jika inputan user adalah "Iraj Ayo Tidur", maka akan mengurangi Spirit_Status Iraj sebanyak 20, jika inputan user adalah "All Status", maka akan menampilkan WakeUp_Status dari Agmal dan Spirit_Status dari Iraj.
 Jika fitur Agmal Ayo Bangun dijalankan, maka counter1 akan ditambah 1, Jika fitur Iraj Ayo Tidur dijalankan, maka counter2 akan ditambah 1. Jika counter1>=3 maka counter1 akan dikurangi 3 dan fitur Iraj Ayo Tidur akan didisable selama 10 detik. Jika counter2>=3 maka counter2 akan dikurangi 3 dan fitur Agmal Ayo Bangun akan didisable selama 10 detik.
 Program akan berakhir jika WakeUp_Status Agmal >=100 dan Spirit_Status Iraj <=0.
+
+## Nomor 4
+### Soal:
+
+
 ## Nomor 5
 ### Soal:
 5. Angga, adik Jiwang akan berulang tahun yang ke sembilan pada tanggal 6 April besok. Karena lupa menabung, Jiwang tidak mempunyai uang sepeserpun untuk membelikan Angga kado. Kamu sebagai sahabat Jiwang ingin membantu Jiwang membahagiakan adiknya sehingga kamu menawarkan bantuan membuatkan permainan komputer sederhana menggunakan program C. Jiwang sangat menyukai idemu tersebut. Berikut permainan yang Jiwang minta.

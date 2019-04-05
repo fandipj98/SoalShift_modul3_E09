@@ -41,6 +41,7 @@ int main(int argc, char const *argv[]) {
 
     int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
     stock = shmat(shmid, NULL, 0);
+    *stock = 0;
     
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");

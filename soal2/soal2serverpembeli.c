@@ -15,6 +15,7 @@ int main(int argc, char const *argv[]) {
 
     int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
     stock = shmat(shmid, NULL, 0);
+    *stock = 0;
     int server_fd, new_socket, valread;
     struct sockaddr_in address;
     int opt = 1;
