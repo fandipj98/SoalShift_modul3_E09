@@ -133,7 +133,7 @@ int main(){
 ```
 Kemudian tinggal print semua nilai yang ada di array yang sudah tersort secara urut.
 
-##Nomor 2
+## Nomor 2
 ### Soal:
 2. Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, dia memintamu membuat program C dengan spesifikasi sebagai berikut:
 	* Terdapat 2 server: server penjual dan server pembeli 
