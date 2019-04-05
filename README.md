@@ -476,7 +476,32 @@ Program akan berakhir jika WakeUp_Status Agmal >=100 dan Spirit_Status Iraj <=0.
 
 ## Nomor 4
 ### Soal:
+4. Buatlah sebuah program C dimana dapat menyimpan list proses yang sedang berjalan (ps -aux) maksimal 10 list proses. Dimana awalnya list proses disimpan dalam di 2 file ekstensi .txt yaitu  SimpanProses1.txt di direktori /home/Document/FolderProses1 dan SimpanProses2.txt di direktori /home/Document/FolderProses2 , setelah itu masing2 file di  kompres zip dengan format nama file KompresProses1.zip dan KompresProses2.zip dan file SimpanProses1.txt dan SimpanProses2.txt akan otomatis terhapus, setelah itu program akan menunggu selama 15 detik lalu program akan mengekstrak kembali file KompresProses1.zip dan KompresProses2.zip 
+__Dengan Syarat :__ 
+	* Setiap list proses yang di simpan dalam masing-masing file .txt harus berjalan bersama-sama
+	* Ketika mengkompres masing-masing file .txt harus berjalan bersama-sama
+	* Ketika Mengekstrak file .zip juga harus secara bersama-sama
+	* Ketika Telah Selesai melakukan kompress file .zip masing-masing file, maka program akan memberi pesan “Menunggu 15 detik untuk mengekstrak kembali”
+	* Wajib Menggunakan Multithreading
+	* Boleh menggunakan system
 
+### Jawaban:
+Langkah pertama adalah membuat 2 thread yang akan berjalan bersamaan
+```
+for (int i = 0; i < 2; i++) {
+	pthread_create(&(tid[i]), NULL, &playandcount, NULL);
+}
+for (int i = 0; i < 2; i++)
+	pthread_join(tid[i],NULL);
+```
+Lalu tiap thread akan menjalankan routine sebagai berikut:
+```
+system("mkdir /home/[user]/Documents/FolderProses[id_thread]");
+system("ps -aux | head > /home/[user]/Documents/FolderProses[id_thread]/SimpanProses[id_thread].txt");
+system("zip -mj /home/[user]/Documents/FolderProses[id_thread]/KompresProses[id_thread].zip /home/[user]/Documents/FolderProses[id_thread]/SimpanProses[id_thread].txt");
+sleep(15);
+system("unzip /home/[user]/Documents/FolderProses[id_thread]/KompresProses[id_thread].zip -d /home/[user]/Documents/FolderProses[id_thread]/");
+```
 
 ## Nomor 5
 ### Soal:
